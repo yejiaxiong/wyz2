@@ -52,6 +52,7 @@ export default {
     if(window.sessionStorage.getItem('activepath') !== null){
       this.activepath = window.sessionStorage.getItem('activepath');
     }
+    
   },
   methods: {
     saveActivePath(path){

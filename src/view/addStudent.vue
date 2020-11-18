@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-breadcrumb separator-class='el-icon-arrow-right'>
-      <el-breadcrumb-item :to="{ path: '/admin' }">我的桌面</el-breadcrumb-item>
+      <el-breadcrumb-item :to="{ path: '/adminwel' }">我的桌面</el-breadcrumb-item>
       <el-breadcrumb-item :to="{ path: '/addstudent' }"
         >添加学生</el-breadcrumb-item
       >
@@ -25,10 +25,10 @@
       <el-row :gutter='20'>
         <el-col :span='12' :offset='5'
           ><div>
-            <el-form-item label='密码' prop='pass'>
+            <el-form-item label='密码' prop='password'>
               <el-input
                 type='password'
-                v-model='ruleForm.pass'
+                v-model='ruleForm.password'
                 autocomplete='off'
               ></el-input>
             </el-form-item></div></el-col
@@ -47,27 +47,27 @@
       <el-row :gutter='20'>
         <el-col :span='12' :offset='5'
           ><div>
-            <el-form-item label='班级' prop='classNum'>
-              <el-select v-model.number='ruleForm.classNum'>
-                <el-option label='170815' value='shanghai'></el-option>
-                <el-option label='170813' value='beijing'></el-option>
-                <el-option label='170814' value='c1'></el-option>
-                <el-option label='170812' value='c2'></el-option
+            <el-form-item label='班级' prop='studentClass'>
+              <el-select v-model.number='ruleForm.studentClass'>
+                <el-option label='170815' value='170815'></el-option>
+                <el-option label='170813' value='170813'></el-option>
+                <el-option label='170814' value='170814'></el-option>
+                <el-option label='170812' value='170812'></el-option
               ></el-select>
             </el-form-item></div></el-col
       ></el-row>
       <el-row :gutter='20'>
         <el-col :span='12' :offset='5'
           ><div>
-            <el-form-item label='姓名' prop='name'>
-              <el-input v-model='ruleForm.name'></el-input>
+            <el-form-item label='姓名' prop='studentName'>
+              <el-input v-model='ruleForm.studentName'></el-input>
             </el-form-item></div></el-col
       ></el-row>
       <el-row :gutter='20'>
         <el-col :span='12' :offset='5'
           ><div>
-            <el-form-item label='学号' prop='num'>
-              <el-input v-model.number='ruleForm.num'></el-input>
+            <el-form-item label='学号' prop='studentNumber'>
+              <el-input v-model.number='ruleForm.studentNumber'></el-input>
             </el-form-item></div></el-col
       ></el-row>
       <el-row :gutter='20'>
@@ -106,7 +106,7 @@ export default {
       if (value === '') {
         // console.log(validatePass2);
         callback(new Error('请再次输入密码'));
-      } else if (value !== this.ruleForm.pass) {
+      } else if (value !== this.ruleForm.password) {
         callback(new Error('两次输入密码不一致!'));
       } else {
         callback();
@@ -114,15 +114,15 @@ export default {
     };
     return {
       ruleForm: {
-        pass: '',
+        password: '',
         checkPass: '',
         userName: '',
-        classNum: '',
-        name: '',
-        num: ''
+        studentName: '',
+        studentClass: '',
+        studentNumber: ''
       },
       rules: {
-        pass: [
+        password: [
           { required: true, message: '请输入密码', trigger: 'blur' },
           { validator: validatePass, trigger: 'blur' }
         ],
@@ -134,12 +134,12 @@ export default {
           { required: true, message: '请输入用户名', trigger: 'blur' },
           { min: 1, max: 8, message: '长度在 1 到 8个字符', trigger: 'blur' }
         ],
-        classNum: [{ required: true, message: '请输入班级', trigger: 'blur' }],
-        name: [
+        studentClass: [{ required: true, message: '请输入班级', trigger: 'blur' }],
+        studentName: [
           { required: true, message: '请输入姓名', trigger: 'blur' },
           { min: 2, max: 5, message: '长度在 2 到 5个字符', trigger: 'blur' }
         ],
-        num: [{ required: true, message: '请输入学号', trigger: 'blur' }]
+        studentNumber: [{ required: true, message: '请输入学号', trigger: 'blur' }]
       }
     };
   },
@@ -167,15 +167,27 @@ export default {
       return row.address;
     },
   
-    submitForm(formName) {
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          alert('添加成功');
-        } else {
-          console.log('error submit!!');
-          return false;
+    submitForm() {
+      console.log(this.ruleForm);
+      
+      this.$http({method: "POST",
+        url: 'http://192.168.2.15:8081/test/insertStudent',
+        headers: {'Content-type': 'application/json;charset=UTF-8'},
+        data: JSON.stringify(this.ruleForm)});
+      this.$router.push({ name: 'adminStudent', params: { id: '2' } })
+
+
+      /*this.tableData.forEach((data)=>{
+        if(data.id === id){
+          
+          // this.$http.post('updateScore',JSON.stringify(data));
+          this.$http({method: "POST",
+            url: 'http://192.168.2.15:8081/test/insertTeacher',
+            headers: {'Content-type': 'application/json;charset=UTF-8'},
+            data: JSON.stringify(data)});
         }
-      });
+        
+      });*/
     }
   }
 }

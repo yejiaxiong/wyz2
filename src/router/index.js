@@ -14,6 +14,7 @@ import addTeacher from '../view/addTeacher.vue'
 import adminTeacher from '../view/adminTeacher.vue'
 import modStudent from '../view/modStudent.vue'
 import modTeacher from '../view/modTeacher.vue'
+import adminWel from '../view/adminWel.vue'
 Vue.use(VueRouter)
 
 // const routes = []
@@ -22,7 +23,7 @@ const router = new VueRouter({
   routes: [
     {
       path: '/',
-      redirect: '/teacher'
+      redirect: '/admin'
     },
     {
       path: '/teacher',
@@ -46,13 +47,13 @@ const router = new VueRouter({
       path: '/admin',
       component: Admin,
       children: [
-      
         { path: '/addstudent', component: addStudent },
         { path: '/adminstudent', component: adminStudent,name:'adminStudent'},
         { path: '/addteacher', component: addTeacher },
         { path: '/adminteacher', component: adminTeacher,name:'adminTeacher'},
-        { path: '/modteacher', component: modTeacher,name:'modTeacher'},
-        { path: '/modstudent', component: modStudent,name:'modStudent'}
+        { path: '/modteacher:rows', component: modTeacher,name:'modTeacher'},
+        { path: '/modstudent:rows', component: modStudent, name: 'modStudent' },
+        { path: '/adminwel', component: adminWel }
       ]
     },
     {
@@ -61,5 +62,17 @@ const router = new VueRouter({
     }
   ]
 });
+
+
+// 挂载路由导航守卫,to表示将要访问的路径，from表示从哪里来，next是下一个要做的操作 next('/login')强制跳转login
+/*router.beforeEach((to, from, next) => {
+  // 访问登录页，放行
+  if (to.path === '/login') return next()
+  // 获取token
+  const tokenStr = window.sessionStorage.getItem('token')
+  // 没有token, 强制跳转到登录页
+  if (!tokenStr) return next('/login')
+  next()
+})*/
 
 export default router;

@@ -3,16 +3,16 @@
   <!-- 登陆页 -->
     <el-form ref="loginFormRef" :model="form" class="login_form" >
     <h1>学生成绩管理系统</h1>
-    <el-form-item label="用户名:" prop='username'>
-      <el-input v-model="form.username"></el-input>
+    <el-form-item label="用户名:" prop='userName'>
+      <el-input v-model="form.userName"></el-input>
     </el-form-item>
     <el-form-item label="密码:" prop='password'>
       <el-input v-model="form.password"></el-input>
     </el-form-item>
     <el-form-item>
       <el-radio-group v-model="form.type"  prop='type' id='radiocss'>
-        <el-radio label="学生"   size="medium"></el-radio>
-        <el-radio label="老师"  size="medium"></el-radio>
+        <el-radio label="学生"   size="medium" ></el-radio>
+        <el-radio label="老师"   size="medium"></el-radio>
         <el-radio label="管理员" size="medium"></el-radio>
       </el-radio-group>
     </el-form-item>
@@ -27,15 +27,25 @@
 export default {
   data () {
     return {
+      typearr:['管理员','老师','学生'],
       form:{
-        username:'Admin',
-        password:'1234',
-        type:'学生'
+        userName:'光明',
+        password:'123',
+        type:'管理员',
+        typeid:''
       }
     }
   },
   methods: {
     onSubmit(){
+      for(let i=0;i<this.typearr.length;i++){
+        if(this.form.type===this.typearr[i]){
+          break;
+        }
+      }
+      this.getLogin();
+      console.log(this.form);
+      
       // 登陆  用户名form.username 密码form.password
       // 根据用户类型请求后台数据库
 
@@ -48,7 +58,21 @@ export default {
       console.log('重置');
       // this.$refs.loginFormRef.resetFields();
       this.$refs[loginFormRef].resetFields();
+      this.form.type='学生';
       console.log(this.form.type);
+    },
+    async getLogin(){
+      let data;
+
+      // data = await this.$http.get('login?');
+      data =  await this.$http({method: "POST",
+        url: 'http://192.168.2.15:8081/test/login',
+        headers: {'Content-type': 'application/json;charset=UTF-8'},
+        data: JSON.stringify(this.form)
+      });
+      console.log(data);
+      // this.tableData = data.data;
+      // console.log(this.tableData);
     }
   }
 }
@@ -76,6 +100,10 @@ export default {
 .el-radio__input.is-checked .el-radio__inner {
     border-color:#009688 !important;
     background:#009688 !important;
+   
+}
+.el-radio__input.is-checked+.el-radio__label{
+    color: black !important;
 }
 
 

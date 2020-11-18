@@ -13,19 +13,19 @@
     >
         <el-table-column prop="id" label="ID" sortable width="180">
         </el-table-column>
-        <el-table-column prop="stuid" label="学号" sortable width="180">
+        <el-table-column prop="studentNumber" label="学号" sortable width="180">
         </el-table-column>
-        <el-table-column prop="name" label="名字" width="180">
+        <el-table-column prop="studentName" label="名字" width="180">
         </el-table-column>
-        <el-table-column prop="classname" label="班级" width="180">
+        <el-table-column prop="studentClass" label="班级" width="180">
         </el-table-column>
         <el-table-column prop="score" label="分数" width="180">
         </el-table-column>
         <!-- 操作列 -->
         <el-table-column align="center">
             <template slot-scope="scope">
-                <el-button type="danger" @click="luru(scope.row.id)" :disabled="scope.row.score!==''">录入成绩</el-button>
-                <el-button type="warning" @click="modify(scope.row.id)" :disabled="scope.row.score===''">修改成绩</el-button>
+                <el-button type="danger" @click="luru(scope.row.id)" :disabled="scope.row.score!==null">录入成绩</el-button>
+                <el-button type="warning" @click="modify(scope.row.id)" :disabled="scope.row.score===null">修改成绩</el-button>
             </template>
         </el-table-column>
 </el-table><br>
@@ -44,58 +44,7 @@
 export default {
   data () {
     return {
-      tableData: [{
-        id: '1',
-        stuid: '3117001940',
-        name: '叶嘉雄',
-        classname: '170815',
-        score: ''
-      },
-      {
-        id: '2',
-        stuid: '3117001941',
-        name: '李光明',
-        classname: '170815',
-        score: 100
-      },
-      {
-        id: '2',
-        stuid: '3117001941',
-        name: '李光明',
-        classname: '170815',
-        score: 100
-      },
-      {
-        id: '2',
-        stuid: '3117001941',
-        name: '李光明',
-        classname: '170815',
-        score: 100
-      },
-      {
-        id: '2',
-        stuid: '3117001941',
-        name: '李光明',
-        classname: '170815',
-        score: 100
-      },
-      {
-        id: '2',
-        stuid: '3117001941',
-        name: '李光明',
-        classname: '170815',
-        score: 100
-      },
-      {
-        id: '2',
-        stuid: '3117001941',
-        name: '李光明',
-        classname: '170815',
-        score: 100
-      }
-
-  
-      ]
+      tableData: []
     }
   },
   methods: {
@@ -107,11 +56,17 @@ export default {
         inputErrorMessage: '分数格式不正确'
       }).then((score) => {
         // score.value就是录入的成绩
-        console.log(score.value);
+        
         this.tableData.forEach((data)=>{
           if(data.id === id){
             data.score = score.value;
+            // this.$http.post('updateScore',JSON.stringify(data));
+            this.$http({method: "POST",
+              url: 'http://192.168.2.15:8081/test/updateScoreFromTeacher',
+              headers: {'Content-type': 'application/json;charset=UTF-8'},
+              data: JSON.stringify(data)});
           }
+        
         })
         this.$message({
           type: 'success',
@@ -134,12 +89,19 @@ export default {
         this.tableData.forEach((data)=>{
           if(data.id === id){
             data.score = score.value;
+            // this.$http.post('updateScore',JSON.stringify(data));
+            this.$http({method: "POST",
+              url: 'http://192.168.2.15:8081/test/updateScoreFromTeacher',
+              headers: {'Content-type': 'application/json;charset=UTF-8'},
+              data: JSON.stringify(data)});
           }
         })
         this.$message({
           type: 'success',
           message: '修改成功!'
         })
+        this.getStudents();
+        console.log(this.tableData);
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -167,7 +129,22 @@ export default {
           message: '已取消查询'
         })
       })
+    },
+    async getStudents(){
+      let data;
+      
+      data = await this.$http.get('getStudentsToTeacher');
+      if (data.status!==200) {
+        return this.$message.error('获取学生信息失败！')
+      }
+      this.tableData = data.data
+      console.log(this.tableData);
     }
+  },
+  created () {
+    //渲染数据
+    //http://192.168.2.15:8081/test/getStudents
+    this.getStudents();
   }
 }
 </script>

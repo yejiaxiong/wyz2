@@ -12,19 +12,13 @@
       style='width: 100%'
       :default-sort="{ prop: 'date', order: 'descending' }"
     >
-      <el-table-column
-        type='index'
-        label='ID'
-        sortable
-        width='50'
-      >
-      </el-table-column>
+     
+      <el-table-column prop='id' label='ID' width='180' sortable> </el-table-column>
+      <el-table-column prop='teacherName' label='姓名' width='180'> </el-table-column>
 
-      <el-table-column prop='nameT' label='姓名' width='180'> </el-table-column>
-
-      <el-table-column prop='userNameT' label='用户名' width='180'>
+      <el-table-column prop='userName' label='用户名' width='180'>
       </el-table-column>
-      <el-table-column prop='passT' label='密码' width='180'> </el-table-column>
+      <el-table-column prop='password' label='密码' width='180'> </el-table-column>
       <el-table-column align='center'>
         <template slot-scope='scope'>
           <el-button
@@ -32,7 +26,7 @@
             @click.native.prevent='deleteRow(scope.$index, tableData)'
             >删除</el-button
           >
-          <el-button type='warning' @click='modTea'>修改</el-button>
+          <el-button type='warning' @click='modTea(scope.row)'>修改</el-button>
         </template>
       </el-table-column>
     </el-table><br>
@@ -52,39 +46,9 @@ export default {
   data() {
     return {
       tableData: [
-        {
-          //假数据
-
-          nameT: '钟1',
-          userNameT: 'z1',
-          passT: 'sadsad'
-        },
-        {
-          nameT: '钟2',
-
-          userNameT: 'z2',
-          passT: 'sadsad1'
-        },
-        {
-          nameT: '钟3',
-
-          userNameT: 'z3',
-          passT: 'sadsad3'
-        },
-        {
-          nameT: '钟4',
-
-          userNameT: 'z4',
-          passT: 'sadsad4'
-        }
-      ],
-      ruleForm: {
-        passT: '',
-        checkPassT: '',
-        userNameT: '',
-
-        nameT: ''
-      }
+        
+      ]
+  
     };
   },
   methods: {
@@ -95,7 +59,12 @@ export default {
         type: 'warning',
         center: true
       }).then(() => {
-        rows.splice(index, 1);
+        this.$http({method: "POST",
+          url: 'http://192.168.2.15:8081/test/deleteTeacher',
+          headers: {'Content-type': 'application/json;charset=UTF-8'},
+          data: JSON.stringify(this.tableData[index].id)
+        });
+        this.getTeachers();
         this.$message({
           type: 'success',
           message: '删除成功!'
@@ -110,8 +79,9 @@ export default {
     handleEdit(index, row) {
       console.log(index, row);
     },
-    modTea() {
-      this.$router.push({ name: 'modTeacher', params: { id: '3' } });
+    modTea(rows) {
+      // console.log(rows);
+      this.$router.push({ name: 'modTeacher', params: { rows:rows } });
     },
     serachLike () {
       console.log('模糊查询')
@@ -133,7 +103,23 @@ export default {
           message: '已取消查询'
         })
       })
+    },
+    async getTeachers(){
+      setTimeout(async ()=>{
+        let data;
+      
+        data = await this.$http.get('getTeachersToAdmin');
+        if (data.status!==200) {
+          return this.$message.error('获取学生信息失败！')
+        }
+        this.tableData = data.data
+        console.log(this.tableData);
+      },100);
     }
+  },
+  created () {
+    //渲染数据
+    this.getTeachers();
   }
 };
 </script>
