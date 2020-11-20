@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item :to="{ path: '/' }">我的桌面</el-breadcrumb-item>
+      <el-breadcrumb-item :to="{ path: '/admin' }">我的桌面</el-breadcrumb-item>
       <el-breadcrumb-item :to="{ path: '/addteacher' }"
         >管理老师</el-breadcrumb-item
       >
@@ -61,14 +61,14 @@
       <el-row :gutter="20">
         <el-col :span="6" :offset="7"
           ><div class="grid-content bg-purple">
-            <el-button type="success" @click="submitForm()"
+            <el-button type="success" @click="submitForm(ruleForm)"
               >立即提交</el-button
             >
           </div></el-col
         >
         <el-col :span="6" :offset="2"
           ><div class="grid-content bg-purple">
-            <el-button @click="resetForm('ruleForm')">重置</el-button>
+            <el-button @click="resetForm()">重置</el-button>
           </div></el-col
         >
       </el-row>
@@ -113,60 +113,59 @@ export default {
       modifyId:'',
       rules: {
         password: [
-          { required: true, message: "请输入密码", trigger: "blur" },
-          { validator: validatePass, trigger: "blur" }
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { validator: validatePass, trigger: 'blur' },
+          { min: 6, max: 10, message: '长度应为6到10个字符', trigger: 'blur' },
+          { pattern: /^[\S]*$/ ,message:'密码不能包含空格', trigger: 'blur' }
         ],
         checkPass: [
           { required: true, message: "请再次输入密码", trigger: "blur" },
           { validator: validatePass2, trigger: "blur" }
         ],
         userName: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
-          { min: 1, max: 8, message: "长度在 1 到 8个字符", trigger: "blur" }
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 3, max: 8, message: '长度应为3到8个字符', trigger: 'blur' },
+          { pattern: /^[a-zA_Z0-9]*$/ ,message:'用户名必须为数字或字母', trigger: 'blur' }
         ],
 
         teacherName: [
-          { required: true, message: "请输入姓名", trigger: "blur" },
-          { min: 2, max: 5, message: "长度在 2 到 5个字符", trigger: "blur" }
+          { required: true, message: '请输入姓名', trigger: 'blur' },
+          { min: 2, max: 5, message: '长度应为2到5个汉字', trigger: 'blur' },
+          { pattern:/^[\u4e00-\u9fa5]*$/,message:'姓名必须为中文', trigger: 'blur' }
         ]
       }
     }
   },
   methods: {
-    submitForm() {
+    // 提交修改
+    submitForm(formName) {
       this.$refs.ruleForm.validate((valid) => {
         if (valid) {
           if(this.checkPass === this.password){
             this.$http({method: "POST",
               url: 'http://192.168.2.15:8081/test/updateTeacher',
               headers: {'Content-type': 'application/json;charset=UTF-8'},
-              data: JSON.stringify(this.ruleForm)
+              data: JSON.stringify(formName)
             });
             this.$router.push({ name: 'adminTeacher'})
+            this.$message.success('修改成功')
+            // console.log(this.ruleForm);
+            // console.log(formName);
           }
         } else {
           console.log("error submit!!");
           return false;
         }
-      });
-      // if(this.checkPass === this.password){
-      //   this.$http({method: "POST",
-      //     url: 'http://192.168.2.15:8081/test/updateTeacher',
-      //     headers: {'Content-type': 'application/json;charset=UTF-8'},
-      //     data: JSON.stringify(this.ruleForm)
-      //   });
-      //   this.$router.push({ name: 'adminTeacher'})
-      // }
-      
+      });      
     },
-    resetForm(formName) {     
+    resetForm() {     
       this.$confirm('此操作将重置你输入的内容, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
         center: true
       }).then(() => {
-        this.$refs[formName].resetFields();
+        this.$refs.ruleForm.resetFields();
         this.$message({
           type: 'success',
           message: '重置成功!'
@@ -183,10 +182,8 @@ export default {
     }
   },
   created(){
-    //修改教师信息时渲染到表单
-    if(this.$route.params.rows){
-      // bug 不能二次刷新
-      this.ruleForm = this.$route.params.rows;
+    if(window.sessionStorage.getItem('rows')){
+      this.ruleForm = JSON.parse(window.sessionStorage.getItem('rows'));
       this.ruleForm.password = '';
       this.isdisabled=true;     
     }

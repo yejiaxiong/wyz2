@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- 管理员添加老师 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/admin' }">我的桌面</el-breadcrumb-item>
       <el-breadcrumb-item :to="{ path: '/addteacher' }"
@@ -61,7 +62,7 @@
         >
         <el-col :span="6" :offset="2"
           ><div class="grid-content bg-purple">
-            <el-button @click="resetForm()">重置</el-button>
+            <el-button @click="resetForm('ruleForm')">重置</el-button>
           </div></el-col
         >
       </el-row>
@@ -71,6 +72,7 @@
 <script>
 export default {
   data() {
+    // 表单规则验证
     let validatePass;
     
     validatePass = (rule, value, callback) => {
@@ -94,6 +96,31 @@ export default {
         callback();
       }
     };
+    let validatePass3;
+
+    validatePass3 = async (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入用户名'));
+      } else {
+        // console.log(value);
+        let result;
+
+        result = await this.$http.get('getTeachersToAdmin');
+        if (result.status!==200) {
+          return this.$message.error('获取学生信息失败！')
+        }
+        this.totalData = result.data;
+        let index;
+
+        index = this.totalData.findIndex((stu)=>{
+          return stu.userName === value;
+        })
+        if(index!==-1){
+          callback(new Error('该用户名已存在'));
+        }
+        callback();
+      }
+    };
     return {
       ruleForm: {
         password: '',
@@ -103,50 +130,48 @@ export default {
       },
       rules: {
         password: [
-          { required: true, message: "请输入密码", trigger: "blur" },
-          { validator: validatePass, trigger: "blur" }
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { validator: validatePass, trigger: 'blur' },
+          { min: 6, max: 10, message: '长度应为6到10个字符', trigger: 'blur' },
+          { pattern: /^[\S]*$/ ,message:'密码不能包含空格', trigger: 'blur' }
         ],
         checkPass: [
           { required: true, message: "请再次输入密码", trigger: "blur" },
           { validator: validatePass2, trigger: "blur" }
         ],
         userName: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
-          { min: 1, max: 8, message: "长度在 1 到 8个字符", trigger: "blur" }
+          { validator: validatePass3, trigger: 'blur' },
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 3, max: 8, message: '长度应为3到8个字符', trigger: 'blur' },
+          { pattern: /^[a-zA_Z0-9]*$/ ,message:'用户名必须为数字或字母', trigger: 'blur' }
         ],
 
         teacherName: [
-          { required: true, message: "请输入姓名", trigger: "blur" },
-          { min: 2, max: 5, message: "长度在 2 到 5个字符", trigger: "blur" }
+          { required: true, message: '请输入姓名', trigger: 'blur' },
+          { min: 2, max: 5, message: '长度应为2到5个汉字', trigger: 'blur' },
+          { pattern:/^[\u4e00-\u9fa5]*$/,message:'姓名必须为中文', trigger: 'blur' }
         ]
       }
     };
   },
   methods: {
+    // 提交添加老师
     submitForm() {
-      console.log(this.ruleForm);
-      
-      this.$http({method: "POST",
-        url: 'http://192.168.2.15:8081/test/insertTeacher',
-        headers: {'Content-type': 'application/json;charset=UTF-8'},
-        data: JSON.stringify(this.ruleForm)});
-      this.$router.push({ name: 'adminTeacher', params: { id: '4' } })
-
-
-      /*this.tableData.forEach((data)=>{
-        if(data.id === id){
-          
-          // this.$http.post('updateScore',JSON.stringify(data));
+      this.$refs.ruleForm.validate((valid) => {
+        if (valid) {
           this.$http({method: "POST",
             url: 'http://192.168.2.15:8081/test/insertTeacher',
             headers: {'Content-type': 'application/json;charset=UTF-8'},
-            data: JSON.stringify(data)});
+            data: JSON.stringify(this.ruleForm)});
+          this.$router.push({ name: 'adminTeacher', params: { id: '4' } })
+        } else {
+          console.log('error submit!!');
+          return false;
         }
-        
-      });*/
+      });
     },
+    // 重置表单
     resetForm(formName) {
-      
       this.$confirm('此操作将重置你输入的内容, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',

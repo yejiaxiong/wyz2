@@ -2,24 +2,26 @@
 <!-- 学生主页 -->
   <el-container>
     <!-- 头部 -->
-    <el-header>学生成绩管理</el-header>
+    <el-header>学生成绩管理
+      <span id='sName'>{{studentName}}，欢迎您！</span>
+      <el-tooltip class="item" effect="dark" content="退出" placement="right" :enterable="false">
+        <el-button type="info" icon="el-icon-close" circle size="mini" @click='logout'></el-button>
+      </el-tooltip>
+      <span id='Time'>登录时间 : {{y}}-{{m}}-{{day}} {{h>10?h:'0'+h}}:{{minute>=10?minute:'0'+minute}}</span>
+    </el-header>
     <el-container>
       <!-- 侧边导航 -->
       <el-aside width="200px" style='background-color:#eeeeee'>
-      
         <el-menu text-color="#000" router background-color="#eeeeee" :default-active="activepath">
-      
           <el-menu-item index="/myscore" route="/myscore" @click="saveActivePath('/myscore')">
             <i class="el-icon-user"></i>
             <span slot="title">我的成绩</span>
           </el-menu-item>
-         
           <el-menu-item index="/changepwd2" route="/changepwd2" @click="saveActivePath('/changepwd2')">
             <i class="el-icon-menu"></i>
             <span slot="title">修改密码</span>
           </el-menu-item>
-        </el-menu> 
-        
+        </el-menu>
       </el-aside>
       <!-- 主体区域 -->
       <el-main style="background: #eeeeee">
@@ -32,33 +34,58 @@
 <script>
 export default {
   data () {
+    let date,day,m,y,h,minute,second;
+
+    date = new Date();
+    day = date.getDate();
+    m = date.getMonth() + 1;
+    y = date.getFullYear();
+    h = date.getHours();
+    minute = date.getMinutes();
+    second=date.getSeconds(); 
     return {
-      tableData: [{
-        id: '1',
-        stuid: '3117001940',
-        name: '叶嘉雄',
-        classname: '170815',
-        score: 100
-      },
-      {
-        id: '2',
-        stuid: '3117001941',
-        name: '李光明',
-        classname: '170815',
-        score: 100
-      }
-      ],
-      activepath: '/myscore'
+      studentName:'',
+      activepath: '/myscore',
+      day:day,
+      y:y,
+      m:m,
+      h:h,
+      minute:minute,
+      second:second     
     }
   },
-  // created生命周期函数 负责获取当前处于哪个标签页(修改密码 or 查看成绩) 存储在sessionStorage中
   // 默认是myscore页
+  // 保存activepath和当前用户id到sessionStorage中
   created () {
+    // console.log(window.sessionStorage.getItem('activepath'));
     if(window.sessionStorage.getItem('activepath') !== null){
       this.activepath = window.sessionStorage.getItem('activepath');
+    }else{
+      this.saveActivePath('myscore')
     }
+    this.studentName = window.sessionStorage.getItem('name');
+  },
+  updated(){
+    this.saveActivePath(window.sessionStorage.getItem('activepath'));
   },
   methods: {
+    // 退出登陆
+    logout(){
+      this.$confirm('您确认要退出登陆吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+        center: true
+      }).then(() => {
+        this.$router.push({ name: 'Login' })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消'
+        });
+      });
+    },
+    // 保存activepath
     saveActivePath(path){
       window.sessionStorage.setItem('activepath',path);
       this.activepath = path;
@@ -90,5 +117,12 @@ li.is-active{
 }
 .el-main{
     position: relative;
+}
+#sName{
+  color:#fff;
+  display: inline-block;
+  margin-left: 60px;
+  margin-right: 40px;
+  font-size: 16px;
 }
 </style>

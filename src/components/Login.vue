@@ -2,24 +2,24 @@
   <div class="box">
   <!-- 登陆页 -->
     <el-form ref="loginFormRef" :model="form" class="login_form" >
-    <h1>学生成绩管理系统</h1>
-    <el-form-item label="用户名:" prop='userName'>
-      <el-input v-model="form.userName"></el-input>
-    </el-form-item>
-    <el-form-item label="密码:" prop='password'>
-      <el-input v-model="form.password"></el-input>
-    </el-form-item>
-    <el-form-item>
-      <el-radio-group v-model="form.type"  prop='type' id='radiocss'>
-        <el-radio label="学生"   size="medium" ></el-radio>
-        <el-radio label="老师"   size="medium"></el-radio>
-        <el-radio label="管理员" size="medium"></el-radio>
-      </el-radio-group>
-    </el-form-item>
-    <el-form-item>
-      <el-button type="primary" @click="onSubmit" style="float:left; background:#009688">立即提交</el-button>
-      <el-button @click="onReset('loginFormRef')" style="float:right">重置</el-button>
-    </el-form-item>
+      <h1>学生成绩管理系统</h1>
+      <el-form-item label="用户名:" prop='userName'>
+        <el-input v-model="form.userName"></el-input>
+      </el-form-item>
+      <el-form-item label="密码:" prop='password'>
+        <el-input v-model="form.password" type="password"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-radio-group v-model="form.type"  prop='type' id='radiocss'>
+          <el-radio label="学生"   size="medium" ></el-radio>
+          <el-radio label="老师"   size="medium"></el-radio>
+          <el-radio label="管理员" size="medium"></el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="onSubmit" style="float:left; background:#009688">立即提交</el-button>
+        <el-button @click="onReset('loginFormRef')" style="float:right">重置</el-button>
+      </el-form-item>
     </el-form>
   </div>
 </template>
@@ -29,23 +29,33 @@ export default {
     return {
       typearr:['管理员','老师','学生'],
       form:{
-        userName:'光明',
-        password:'123',
+        userName:'guangm',
+        password:'666666',
         type:'管理员',
         typeid:''
       }
     }
   },
   methods: {
-    onSubmit(){
-      for(let i=0;i<this.typearr.length;i++){
-        if(this.form.type===this.typearr[i]){
-          break;
+    // 登陆验证
+    async onSubmit(){
+      let result;
+
+      result = await this.getLogin();
+      console.log(result);
+      if(result.url==="false"){
+        this.$message.error('用户名或密码有误')
+      }else{
+        if(result.url==='Student'){
+          window.sessionStorage.setItem('stuid',result.id);
+        }else if(result.url==='Admin'){
+          window.sessionStorage.setItem('adminid',result.id);
+        }else if(result.url==='Teacher'){
+          window.sessionStorage.setItem('teacherid',result.id);
         }
+        this.$router.push({ name: result.url, params: {name:result.name,id:result.id} })
+        window.sessionStorage.setItem('name',result.name)
       }
-      this.getLogin();
-      console.log(this.form);
-      
       // 登陆  用户名form.username 密码form.password
       // 根据用户类型请求后台数据库
 
@@ -53,6 +63,7 @@ export default {
 
       // 登陆失败弹出提示框信息
     },
+    // 重置
     onReset(loginFormRef){
       // 重置按钮
       console.log('重置');
@@ -61,19 +72,24 @@ export default {
       this.form.type='学生';
       console.log(this.form.type);
     },
+    // 登陆获取
     async getLogin(){
-      let data;
+      let result;
 
-      // data = await this.$http.get('login?');
-      data =  await this.$http({method: "POST",
+      result =  await this.$http({method: "POST",
         url: 'http://192.168.2.15:8081/test/login',
         headers: {'Content-type': 'application/json;charset=UTF-8'},
         data: JSON.stringify(this.form)
       });
-      console.log(data);
-      // this.tableData = data.data;
-      // console.log(this.tableData);
+      return result.data;
     }
+  },
+  created(){
+    window.sessionStorage.removeItem('stuid');
+    window.sessionStorage.removeItem('adminid');
+    window.sessionStorage.removeItem('teacherid');
+    window.sessionStorage.removeItem('currentId');
+    window.sessionStorage.removeItem('activepath');
   }
 }
 </script>

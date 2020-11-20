@@ -1,14 +1,14 @@
 <template>
   <div>
     <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item :to="{ path: '/' }">我的桌面</el-breadcrumb-item>
+      <el-breadcrumb-item>我的桌面</el-breadcrumb-item>
       <el-breadcrumb-item :to="{ path: '/myscore' }">成绩查看</el-breadcrumb-item>
     </el-breadcrumb>
     <h2>成绩查看</h2>
     <div id="ms">
-      <div>姓名：{{stu.name}}</div>
-      <div>班级：{{stu.classname}}</div>
-      <div>学号：{{stu.stuid}}</div>
+      <div>姓名：{{stu.studentName}}</div>
+      <div>班级：{{stu.studentClass}}</div>
+      <div>学号：{{stu.studentNumber}}</div>
       <div>分数：{{stu.score}}分</div>
     </div>
   </div>
@@ -18,12 +18,27 @@ export default {
   data() {
     return {
       stu: {
-        stuid: '3117001940',
-        name: '叶嘉雄',
-        classname: '170815',
-        score: 100
+        studentNumber: '',
+        studentName: '',
+        studentClass: '',
+        score: ''
       }
     };
+  },
+  created(){
+    this.getMessage();
+  },
+  methods: {
+    async getMessage(){
+      let result;
+
+      result = await this.$http.get('getStudentById?id='+window.sessionStorage.getItem('stuid'));
+      if(result.status === 200){
+        this.stu = result.data;
+      }else{
+        return this.$message.error('获取信息失败！')
+      }
+    }
   }
 };
 </script>

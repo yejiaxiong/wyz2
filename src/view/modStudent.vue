@@ -133,23 +133,31 @@ export default {
       },
       rules: {
         password: [
-          { required: true, message: "请输入密码", trigger: "blur" },
-          { validator: validatePass, trigger: "blur" }
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { validator: validatePass, trigger: 'blur' },
+          { min: 6, max: 10, message: '长度应为6到10个字符', trigger: 'blur' },
+          { pattern: /^[\S]*$/ ,message:'密码不能包含空格', trigger: 'blur' }
         ],
         checkPass: [
-          { required: true, message: "请再次输入密码", trigger: "blur" },
-          { validator: validatePass2, trigger: "blur" }
+          { required: true, message: '请再次输入密码', trigger: 'blur' },
+          { validator: validatePass2, trigger: 'blur' }
         ],
         userName: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
-          { min: 1, max: 8, message: "长度在 1 到 8个字符", trigger: "blur" }
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 3, max: 8, message: '长度应为3到8个字符', trigger: 'blur' },
+          { pattern: /^[a-zA_Z0-9]*$/ ,message:'用户名必须为数字或字母', trigger: 'blur' }
         ],
-        studentClass: [{ required: true, message: "请输入班级", trigger: "blur" }],
+        studentClass: [{ required: true, message: '请输入班级', trigger: 'blur' }],
         studentName: [
-          { required: true, message: "请输入姓名", trigger: "blur" },
-          { min: 2, max: 5, message: "长度在 2 到 5个字符", trigger: "blur" }
+          { required: true, message: '请输入姓名', trigger: 'blur' },
+          { min: 2, max: 5, message: '长度应为2到5个汉字', trigger: 'blur' },
+          { pattern:/^[\u4e00-\u9fa5]*$/,message:'姓名必须为中文', trigger: 'blur' }
         ],
-        studentNumber: [{ required: true, message: "请输入学号", trigger: "blur" }]
+        studentNumber: [
+          { required: true, message: '请输入学号', trigger: 'blur' },
+          { pattern: /^[0-9]*$/ ,message:'学号必须为数字', trigger: 'blur' },
+          { len: 10, message: '学号长度必须为10个字符', trigger: 'blur' }
+        ]
       }
     };
   },
@@ -164,6 +172,7 @@ export default {
               data: JSON.stringify(this.ruleForm)
             });
             this.$router.push({ name: 'adminStudent'})
+            this.$message({type:'success',message:'修改成功！'})
           }
           
         } else {
@@ -196,10 +205,9 @@ export default {
     }
   },
   created(){
-    //修改教师信息时渲染到表单
-    if(this.$route.params.rows){
+    if(window.sessionStorage.getItem('rows')){
       // bug 不能二次刷新
-      this.ruleForm = this.$route.params.rows;
+      this.ruleForm = JSON.parse(window.sessionStorage.getItem('rows'));
       this.ruleForm.password = '';
       this.isdisabled=true;     
     }

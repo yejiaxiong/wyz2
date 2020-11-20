@@ -16,36 +16,37 @@ import modStudent from '../view/modStudent.vue'
 import modTeacher from '../view/modTeacher.vue'
 import adminWel from '../view/adminWel.vue'
 Vue.use(VueRouter)
-
-// const routes = []
-
 const router = new VueRouter({
   routes: [
     {
       path: '/',
-      redirect: '/admin'
+      redirect: '/login'
     },
     {
       path: '/teacher',
       component: Teacher,
+      name:'Teacher',
       children: [
         { path: '/', redirect: '/luru' },
-        { path: '/luru', component: Luru },
+        { path: '/luru', component: Luru, name:'luru' },
         { path: '/changepwd', component: ChangePwd }
       ]
     },
     {
       path: '/student',
       component: Student,
+      name:'Student',
       children: [
         { path: '/', redirect: '/myscore' },
         { path: '/changepwd2', component: ChangePwd2 },
-        { path: '/myscore', component: Myscore }
+        { path: '/myscore', component: Myscore, name:'myscore' }
       ]
     },
     {
       path: '/admin',
       component: Admin,
+      name: 'Admin',
+      redirect: '/adminWel',
       children: [
         { path: '/addstudent', component: addStudent },
         { path: '/adminstudent', component: adminStudent,name:'adminStudent'},
@@ -58,21 +59,52 @@ const router = new VueRouter({
     },
     {
       path: '/login',
-      component: Login
+      component: Login,
+      name:'Login'
     }
   ]
 });
 
-
 // 挂载路由导航守卫,to表示将要访问的路径，from表示从哪里来，next是下一个要做的操作 next('/login')强制跳转login
-/*router.beforeEach((to, from, next) => {
+router.beforeEach((to, from, next) => {
   // 访问登录页，放行
-  if (to.path === '/login') return next()
-  // 获取token
-  const tokenStr = window.sessionStorage.getItem('token')
-  // 没有token, 强制跳转到登录页
-  if (!tokenStr) return next('/login')
+  if (to.path === '/login') {
+    return next()
+  }
+  
+  // 学生
+  if (to.path === '/student' || to.path === '/myscore' || to.path === '/changepwd2'){
+    // 获取token
+    const id = window.sessionStorage.getItem('stuid')
+
+    // 没有token, 强制跳转到登录页
+    if (!id) {
+      return next('/login')
+    }
+  }
+
+  // 管理员
+  if (to.path === '/admin' || to.path === '/adminWel' || to.path === '/addstudent' || to.path === '/adminstudent' || to.path === '/addteacher' || to.path === '/adminteacher' || to.path === '/modteacher' || to.path === '/modstudent' || to.path === '/adminwel'){
+    // 获取token
+    const id = window.sessionStorage.getItem('adminid')
+
+    // 没有token, 强制跳转到登录页
+    if (!id) {
+      return next('/login')
+    }
+  }
+
+  // 教师
+  if (to.path === '/teacher' || to.path === '/luru' || to.path === '/changepwd'){
+    // 获取token
+    const id = window.sessionStorage.getItem('teacherid')
+
+    // 没有token, 强制跳转到登录页
+    if (!id) {
+      return next('/login')
+    }
+  }
   next()
-})*/
+})
 
 export default router;
